@@ -11,7 +11,7 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb+srv://nishantnvn05:anonymous345@cluster0.zchlj1u.mongodb.net/todolistDB", {useNewUrlParser: true});
+mongoose.connect("YOUR KEY", {useNewUrlParser: true});
 
 const itemsSchema = {
   name: String
@@ -112,6 +112,7 @@ app.post("/", function(req, res){
 app.post("/remove", function(req, res){
   const checkedItemId = req.body.checkbox;
   const listName = req.body.listName;
+  console.log(listName)
 
   if(listName === "Today") {
     Item.findByIdAndRemove(checkedItemId, function(err){
@@ -121,16 +122,16 @@ app.post("/remove", function(req, res){
       }
     });
   } else {
-    Item.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, function(err,foundList){
-      if (!err) {
-        res.redirect("/" + listName);
-      }
-    });
-    // List.findOne({name: listName}, function(err, foundList){
-    //   foundList.filter(item => item._id !== checkedItemId);
-    //   foundList.save();
-    //   res.redirect("/" + listName);
+    // Item.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, function(err,foundList){
+    //   if (!err) {
+    //     res.redirect("/" + listName);
+    //   }
     // });
+    List.findOne({name: listName}, function(err, foundList){
+      foundList.items.filter(item => item._id !== checkedItemId);
+      foundList.save();
+      res.redirect("/" + listName);
+    });
   }
 });
 
@@ -144,6 +145,6 @@ if (port == null || port == "") {
   port = 3000;
 }
 app.listen(port,function(){
-  console.log("Server has started successfully");
+  console.log(`Server has started successfully on port ${port}`);
 });
 
